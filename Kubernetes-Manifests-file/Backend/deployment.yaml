@@ -1,57 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment
-metadata: 
-  name: api
+metadata:
+  name: backend
   namespace: workshop
-  labels: 
-    role: api
-    env: demo
-spec: 
-  replicas: 2
-  strategy: 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  strategy:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 25%
-  selector: 
-    matchLabels:
-      role: api
+      maxUnavailable: 0
   template:
     metadata:
       labels:
-        role: api
+        app: backend
     spec:
-      imagePullSecrets:
-      - name: ecr-registry-secret
       containers:
-      - name: api
-        image: 407622020962.dkr.ecr.us-east-1.amazonaws.com/backend:latest
-        imagePullPolicy: Always
-        env:
-          - name: MONGO_CONN_STR
-            value: mongodb://mongodb-svc:27017/todo?directConnection=true
-          - name: MONGO_USERNAME
-            valueFrom:
-              secretKeyRef:
-                name: mongo-sec
-                key: username
-          - name: MONGO_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: mongo-sec
-                key: password
-        ports:
-        - containerPort: 3500
-        livenessProbe: 
-          httpGet:
-            path: /ok
-            port: 3500
-          initialDelaySeconds: 2
-          periodSeconds: 5
-        readinessProbe:
-          httpGet:
-            path: /ok
-            port: 3500
-          initialDelaySeconds: 5
-          periodSeconds: 5
-          successThreshold: 1
+        - name: backend
+          image: 729703919434.dkr.ecr.us-west-2.amazonaws.com/three-tier-backend:IMAGE_TAG
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: mongo-secret
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
