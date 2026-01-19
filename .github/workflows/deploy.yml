@@ -64,7 +64,7 @@ jobs:
       run: |
         kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/pv.yaml
         kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/pvc.yaml
-        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/secret.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/secrets.yaml
         kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/deployment.yaml
         kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/service.yaml
         kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Backend/deployment.yaml
