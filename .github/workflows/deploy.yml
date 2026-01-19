@@ -62,12 +62,15 @@ jobs:
     # 8️⃣ Deploy to Kubernetes
     - name: Deploy Kubernetes Manifests
       run: |
-        sed -i "s|IMAGE_TAG|${{ github.sha }}|g" Kubernetes-Manifests-file/Frontend/deployment.yaml
-        sed -i "s|IMAGE_TAG|${{ github.sha }}|g" Kubernetes-Manifests-file/Backend/deployment.yaml
-
-        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/
-        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Backend/
-        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Frontend/
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/pv.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/pvc.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/secrets.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/deployment.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/service.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Backend/deployment.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Backend/service.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Frontend/deployment.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Frontend/service.yaml
         kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/ingress.yaml
 
     # 9️⃣ Verify Deployment

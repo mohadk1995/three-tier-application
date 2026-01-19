@@ -3,31 +3,32 @@ kind: Deployment
 metadata:
   name: frontend
   namespace: workshop
-spec:
+  labels:
+    role: frontend
+    env: demo
+spec: 
   replicas: 1
-  selector:
-    matchLabels:
-      app: frontend
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 0
+      maxUnavailable: 25%
+  selector:
+    matchLabels: 
+      role: frontend
   template:
     metadata:
       labels:
-        app: frontend
-    spec:
+        role: frontend
+    spec: 
+      imagePullSecrets:
+      - name: ecr-registry-secret
       containers:
-        - name: frontend
-          image: 729703919434.dkr.ecr.us-west-2.amazonaws.com/three-tier-frontend:IMAGE_TAG
-          imagePullPolicy: IfNotPresent
-          ports:
-            - containerPort: 3000
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "128Mi"
-            limits:
-              cpu: "250m"
-              memory: "256Mi"
+      - name: frontend
+        image: 407622020962.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
+        imagePullPolicy: Always
+        env:
+          - name: REACT_APP_BACKEND_URL
+            value: "http://backend.amanpathakdevops.study/api/tasks"
+        ports:
+        - containerPort: 3000
