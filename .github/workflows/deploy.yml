@@ -38,14 +38,14 @@ jobs:
     # 4️⃣ Build & Push Frontend Image
     - name: Build & Push Frontend
       run: |
-        docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_ECR_REPO:${{ github.sha }} ./Application-Code/frontend
-        docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_ECR_REPO:${{ github.sha }}
+        docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_ECR_REPO:latest ./Application-Code/frontend
+        docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$FRONTEND_ECR_REPO:latest
 
     # 5️⃣ Build & Push Backend Image
     - name: Build & Push Backend
       run: |
-        docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_ECR_REPO:${{ github.sha }} ./Application-Code/backend
-        docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_ECR_REPO:${{ github.sha }}
+        docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_ECR_REPO:latest ./Application-Code/backend
+        docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_ECR_REPO:latest
 
     # 6️⃣ Update kubeconfig (CRITICAL)
     - name: Update kubeconfig
