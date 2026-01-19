@@ -1,5 +1,5 @@
 name: Deploy Three Tier App to EKS
-#
+
 on:
   push:
     branches:
@@ -11,6 +11,7 @@ env:
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
   FRONTEND_ECR_REPO: three-tier-frontend
   BACKEND_ECR_REPO: three-tier-backend
+  NAMESPACE: workshop
 
 jobs:
   deploy:
@@ -32,7 +33,6 @@ jobs:
 
     # 3️⃣ Login to Amazon ECR
     - name: Login to Amazon ECR
-      id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
     # 4️⃣ Build & Push Frontend Image
@@ -47,28 +47,35 @@ jobs:
         docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_ECR_REPO:latest ./Application-Code/backend
         docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$BACKEND_ECR_REPO:latest
 
-    # 6️⃣ Update kubeconfig
+    # 6️⃣ Update kubeconfig (CRITICAL)
     - name: Update kubeconfig
       run: |
-        aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER_NAME
+        aws eks update-kubeconfig \
+          --region $AWS_REGION \
+          --name $EKS_CLUSTER_NAME
 
-    # 7️⃣ Deploy to Kubernetes
+    # 7️⃣ Ensure Namespace Exists
+    - name: Create Namespace if not exists
+      run: |
+        kubectl get namespace $NAMESPACE || kubectl create namespace $NAMESPACE
+
+    # 8️⃣ Deploy to Kubernetes
     - name: Deploy Kubernetes Manifests
       run: |
-        kubectl apply -f Kubernetes-Manifests-file/Database/pv.yaml
-        kubectl apply -f Kubernetes-Manifests-file/Database/pvc.yaml
-        kubectl apply -f Kubernetes-Manifests-file/Database/secret.yaml
-        kubectl apply -f Kubernetes-Manifests-file/Database/deployment.yaml
-        kubectl apply -f Kubernetes-Manifests-file/Database/service.yaml
-        kubectl apply -f Kubernetes-Manifests-file/Backend/deployment.yaml
-        kubectl apply -f Kubernetes-Manifests-file/Backend/service.yaml
-        kubectl apply -f Kubernetes-Manifests-file/Frontend/deployment.yaml
-        kubectl apply -f Kubernetes-Manifests-file/Frontend/service.yaml
-        kubectl apply -f ./ingress.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/pv.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/pvc.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/secret.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/deployment.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Database/service.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Backend/deployment.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Backend/service.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Frontend/deployment.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/Frontend/service.yaml
+        kubectl apply -n $NAMESPACE -f Kubernetes-Manifests-file/ingress.yaml
 
-    # 8️⃣ Verify Deployment
+    # 9️⃣ Verify Deployment
     - name: Verify Pods
       run: |
-        kubectl get pods -n workshop
-        kubectl get svc -n workshop
-        kubectl get ingress -n workshop
+        kubectl get pods -n $NAMESPACE
+        kubectl get svc -n $NAMESPACE
+        kubectl get ingress -n $NAMESPACE
